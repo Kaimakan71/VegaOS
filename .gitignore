@@ -1,0 +1,11 @@
+*.iso
+*.o
+*.d
+vega-kernel
+cross/
+autom4te.cache
+config.status
+config.log
+configure
+/Makefile
+/stand

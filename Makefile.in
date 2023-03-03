@@ -1,0 +1,43 @@
+SYSTEM_CFLAGS = @CFLAGS@
+SYSTEM_ASMFLAGS = -felf64
+SYSTEM_LDFLAGS = -nostdlib -zmax-page-size=0x1000 -static -Tconf/link.ld
+
+SYSTEM_CFILES = $(shell find sys/ -name "*.c")
+SYSTEM_ASMFILES = $(shell find sys/ -name "*.asm")
+
+CC = cross/bin/x86_64-elf-gcc
+LD = cross/bin/x86_64-elf-ld
+
+ASM = nasm
+
+SYSTEM_OBJECTS = $(SYSTEM_CFILES:.c=.o)
+SYSTEM_ASM_OBJECTS = $(SYSTEM_ASMFILES:.asm=.s.o)
+
+.PHONY: all
+all: stand/limine/ base/boot/vega-kernel
+
+base/boot/vega-kernel: $(SYSTEM_OBJECTS) $(SYSTEM_ASM_OBJECTS)
+	mkdir -p iso_root/boot/
+	mkdir -p base/boot/
+	$(LD) $(SYSTEM_LDFLAGS) $(SYSTEM_OBJECTS) $(SYSTEM_ASM_OBJECTS) -o $@
+	mkdir -p iso_root/boot/
+	cd base/; tar -cvf ../iso_root/boot/sysroot.tar *
+	cp conf/limine.cfg stand/limine/limine.sys stand/limine/limine-cd.bin \
+		stand/limine/limine-cd-efi.bin iso_root/
+	cp base/boot/vega-kernel iso_root/boot/
+	xorriso -as mkisofs -b limine-cd.bin -no-emul-boot -boot-load-size 4 \
+		-boot-info-table --efi-boot limine-cd-efi.bin -efi-boot-part \
+		--efi-boot-image --protective-msdos-label iso_root -o Vega.iso
+	stand/limine/limine-deploy Vega.iso
+	rm -rf iso_root
+
+%.o: %.c
+	$(CC) -c $(SYSTEM_CFLAGS) $< -o $@
+
+%.s.o: %.asm
+	$(ASM) $(SYSTEM_ASMFILES) $< $@
+
+stand/limine/:
+	mkdir -p stand/
+	git clone https://github.com/limine-bootloader/limine.git --branch=v4.0-binary --depth=1 stand/limine/
+	make -C stand/limine
