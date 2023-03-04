@@ -7,5 +7,6 @@
 #define __naked     __attribute__((naked))
 #define __packed    __attribute__((packed))
 #define __dead      __attribute__((noreturn))
+#define __unused    __attribute__((unused))
 
 #endif
