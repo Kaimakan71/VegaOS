@@ -2,11 +2,16 @@
 
 #include <sys/cdefs.h>
 #include <sys/pal.h>
-#include <pty/core.h>
+#include <sys/printk.h>
+#include <sys/module.h>
+
+#define VEGA_COPYRIGHT "Copyright (c) 2023 Ian Marco Moffett"
+
+MODULE("kernel_init");
 
 __dead void _start(void)
 {
-  pty_putstr("Hello, World!\n", 0xFFFFFF);
+  printk("VegaOS v%s - %s\n\n", VEGA_VERSION, VEGA_COPYRIGHT);
 
   for (;;)
   {
