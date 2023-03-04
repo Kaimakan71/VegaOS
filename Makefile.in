@@ -5,12 +5,15 @@ SYSTEM_LDFLAGS = -nostdlib -zmax-page-size=0x1000 -static -Tconf/link.ld
 SYSTEM_CFILES = $(shell find sys/ -name "*.c")
 SYSTEM_ASMFILES = $(shell find sys/ -name "*.asm")
 
+QEMU_FLAGS = --enable-kvm -monitor stdio -cpu qemu64 -M q35 -m 256M
+
 CC = cross/bin/x86_64-elf-gcc
 LD = cross/bin/x86_64-elf-ld
 
 ASM = nasm
 
 SYSTEM_OBJECTS = $(SYSTEM_CFILES:.c=.o)
+SYSTEM_HEADER_DEPS = $(SYSTEM_CFILES:.c=.d)
 SYSTEM_ASM_OBJECTS = $(SYSTEM_ASMFILES:.asm=.s.o)
 
 .PHONY: all
@@ -31,6 +34,7 @@ base/boot/vega-kernel: $(SYSTEM_OBJECTS) $(SYSTEM_ASM_OBJECTS)
 	stand/limine/limine-deploy Vega.iso
 	rm -rf iso_root
 
+-include $(SYSTEM_HEADER_DEPS)
 %.o: %.c
 	$(CC) -c $(SYSTEM_CFLAGS) $< -o $@
 
@@ -41,3 +45,11 @@ stand/limine/:
 	mkdir -p stand/
 	git clone https://github.com/limine-bootloader/limine.git --branch=v4.0-binary --depth=1 stand/limine/
 	make -C stand/limine
+
+.PHONY: run
+run:
+		qemu-system-x86_64 $(QEMU_FLAGS) -cdrom Vega.iso
+
+.PHONY: clean
+clean:
+	rm $(SYSTEM_ASM_OBJECTS) $(SYSTEM_OBJECTS) $(SYSTEM_HEADER_DEPS)
