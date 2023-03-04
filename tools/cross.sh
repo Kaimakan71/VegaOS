@@ -15,7 +15,7 @@
 set -e
 
 # Target to use
-TARGET=x86_64-elf
+TARGET=$1
 
 # Versions to build
 # Always use the latest working version (test before updating)
