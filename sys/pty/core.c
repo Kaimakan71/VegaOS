@@ -36,7 +36,7 @@ void pty_putstr(const char *str, uint32_t color)
       case '\n':
         newline();
         ++str;
-        break;
+        continue;
     }
     
     pty_putch(cursor_x, cursor_y, *str, color, 0x000000);
