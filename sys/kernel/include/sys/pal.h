@@ -20,7 +20,7 @@
  *  you use global_irq_disable() first.
  */
 
-#define halt()                  __asm("hlt")
+# define halt()                  __asm("hlt")
 
 /*
  *  Prevents the processor from responding
@@ -30,14 +30,19 @@
  *        impact, use judiciously.
  */
 
-#define global_irq_disable()    __asm("cli")
+# define global_irq_disable()    __asm("cli")
 
 /*
  *  Allows the processor to respond
  *  to interrupts.
  */
 
-#define global_irq_enable()     __asm("sti")
+# define global_irq_enable()     __asm("sti")
 
+#elif defined(__aarch64__)
+
+# define halt()                  __asm("wfi")
+# define global_irq_disable()    __asm("msr daifset, #2")
+# define global_irq_enable()     __asm("msr daifclr, #2")
 #endif    /* __x86_64__  */
 #endif    /* _SYS_PAL_H_ */
