@@ -617,6 +617,7 @@ PACKAGE_URL=''
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+VEGA_VERSION
 CFLAGS
 target_alias
 host_alias
@@ -1719,6 +1720,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+VEGA_VERSION="0.0.1"
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for cross/bin/x86_64-elf-gcc" >&5
 printf %s "checking for cross/bin/x86_64-elf-gcc... " >&6; }
@@ -1773,9 +1775,12 @@ CFLAGS="-fexceptions --std=gnu11 -ffreestanding -fno-stack-protector -fno-pic \\
 	-Werror=incompatible-pointer-types -Werror=int-to-pointer-cast \\
 	-Werror=return-type -Wunused -mabi=sysv -mno-80387 -mno-mmx -mno-3dnow \\
 	-mno-sse -mno-sse2 -mno-red-zone -mcmodel=kernel -pedantic \\
-	-I sys/include/ -D_KERNEL -Wno-pointer-sign -MMD"
+	-I sys/include/ -I sys/include/sys/posix/ -D_KERNEL -Wno-pointer-sign -MMD"
+
 
 CFLAGS=$CFLAGS
+
+VEGA_VERSION=$VEGA_VERSION
 
 
 ac_config_files="$ac_config_files Makefile"
