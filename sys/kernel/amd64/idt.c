@@ -3,6 +3,8 @@
 #include <amd64/idt.h>
 #include <sys/bug.h>
 
+#if defined(__x86_64__)
+
 #define IDT_TRAP_GATE_FLAGS 0x8F
 #define IDT_INT_GATE_FLAGS  0x8E
 #define IDT_INT_GATE_USER   0xEE
@@ -38,3 +40,5 @@ void register_exception(uint8_t vector, uintptr_t isr)
 {
   set_desc(vector, isr, IDT_TRAP_GATE_FLAGS);
 }
+
+#endif    /* __x86_64__ */

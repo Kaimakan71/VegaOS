@@ -4,6 +4,8 @@
 #include <amd64/idt.h>
 #include <sys/panic.h>
 
+#if defined(__x86_64__)
+
 #define MAKE_ISR(vector, name)               \
   static void exception_##vector(void* sf)   \
   {                                          \
@@ -43,3 +45,5 @@ void exceptions_init(void)
   REGISTER_EXCEPTION(0xD);
   REGISTER_EXCEPTION(0xE);
 }
+
+#endif    /* __x86_64__ */
