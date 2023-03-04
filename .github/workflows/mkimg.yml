@@ -1,9 +1,13 @@
 name: mkimg
 on:
   push:
-    branches: [ main ]
+    branches:
+      - 'main'
+      - 'prep-*'
   pull_request:
-    branches: [ main ]
+    branches:
+      - 'main'
+      - 'prep-*'
   workflow_dispatch:
 jobs:
    job:
