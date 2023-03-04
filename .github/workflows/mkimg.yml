@@ -2,12 +2,10 @@ name: mkimg
 on:
   push:
     branches:
-      - 'main'
-      - 'prep-*'
+      - '*'
   pull_request:
     branches:
-      - 'main'
-      - 'prep-*'
+      - '*'
   workflow_dispatch:
 jobs:
    job:
@@ -28,6 +26,7 @@ jobs:
           ./configure
           make
       - name: Uploading ISO as artifact
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v2
         with:
           name: Vega
