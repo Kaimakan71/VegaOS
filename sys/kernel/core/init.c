@@ -6,6 +6,7 @@
 #include <sys/module.h>
 #include <sys/types.h>
 #include <mm/pmm.h>
+#include <mm/vmm.h>
 
 #if defined(__x86_64__)
 # include <amd64/exceptions.h>
@@ -64,6 +65,7 @@ __dead void _start(void)
 #endif
 
   pmm_init();
+  vmm_init();
 
   for (;;)
   {
