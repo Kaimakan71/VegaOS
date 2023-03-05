@@ -25,7 +25,7 @@ QEMU_FLAGS = -cpu cortex-a72        \
 
 
 ASM = cross/bin/aarch64-elf-as
-ASMFLAGS = -D__aarch64__
+ASMFLAGS = --defsym __aarch64__=1
 else
 CC = cross/bin/x86_64-elf-gcc
 LD = cross/bin/x86_64-elf-ld
