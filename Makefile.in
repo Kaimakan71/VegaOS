@@ -30,7 +30,7 @@ else
 CC = cross/bin/x86_64-elf-gcc
 LD = cross/bin/x86_64-elf-ld
 SYSTEM_LDFLAGS = -nostdlib -zmax-page-size=0x1000 -static -Tconf/link-x86_64.ld
-QEMU_FLAGS = --enable-kvm -monitor stdio -cpu qemu64 -M q35 -m 256M -cdrom Vega.iso
+QEMU_FLAGS = --enable-kvm -monitor stdio -cpu qemu64 -M q35 -m 256M
 ASM = cross/bin/x86_64-elf-as
 ASMFLAGS =
 endif
