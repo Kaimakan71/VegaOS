@@ -12,7 +12,7 @@
 # include <amd64/exceptions.h>
 # include <amd64/idt.h>
 #elif defined(__aarch64__)
-  /* TODO */
+# include <aarch64/exceptions.h>
 #endif
 
 MODULE("kinit");
@@ -66,6 +66,7 @@ __dead void _start(void)
 
   pmm_init();
   vmm_init();
+  exceptions_init();
 
   for (;;)
   {
