@@ -1,5 +1,5 @@
 /*
- *  description: Virtual memory manager.
+ *  description: Virtual memory manager for AARCH64.
  *  author: Ian Marco Moffett.
  */
 
