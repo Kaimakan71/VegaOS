@@ -83,6 +83,12 @@ static uintptr_t get_pml1(uintptr_t pagemap_phys, uintptr_t virt,
 void vmm_map_page(uintptr_t pagemap_phys, uintptr_t virt, uintptr_t phys,
                   size_t flags)
 {
+  /*
+   *  actual_flags are actual flags that go
+   *  into the translation table.
+   *
+   *  flags is an abstraction.
+   */
   size_t actual_flags = PT_FLAG_VALID
                         | PT_FLAG_4K_PAGE
                         | PT_FLAG_USER
