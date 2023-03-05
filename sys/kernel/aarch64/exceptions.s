@@ -9,7 +9,7 @@ svc_msg: .string "SVC not implemented (TODO)"
 
 
 .section .text
-exceptions_init:  
+exceptions_init:
   ldr x0, =vector_tbl
   msr vbar_el1, x0
   ret
@@ -45,7 +45,7 @@ svc_handler:
 mem_access_violation:
   do_panic mem_access_violation_msg
 
-.align 8
+.align 11
 vector_tbl:
   b isr
 
