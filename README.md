@@ -1,5 +1,8 @@
 # VegaOS
-VegaOS is a contemporary operating system designed for the x86_64 and arm64 (aka aarch64) architectures. It is written entirely in the Rust programming language and features a modern kernel, drivers, and various system tools, making it a fully-functional and secure operating system designed for future.
+VegaOS is a microkernel-based operating system designed to be secure and usable on both AARCH64 and x86_64 platforms. 
+We aim to provide a user-friendly interface and support for common user-level utilities and tools, while also being powerful enough for advanced users. 
+
+Note: VegaOS is in an early state.
 
 ## Getting started
 These instructions will guide you through the process of building VegaOS from source and installing it on your machine.
