@@ -22,8 +22,8 @@ jobs:
           sudo apt-get -y install nasm
           sudo apt-get -y install xorriso
           sudo apt-get -y install autoconf
-          bash tools/cross.sh
           ./configure
+          make cross_x86_64
           make
       - name: Uploading ISO as artifact
         uses: actions/upload-artifact@v2

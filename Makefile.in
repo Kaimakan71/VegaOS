@@ -3,21 +3,39 @@ VEGA_VERSION = @VEGA_VERSION@
 SYSTEM_DEFINES = -D VEGA_VERSION='"$(VEGA_VERSION)"'
 SYSTEM_CFLAGS = @CFLAGS@ $(SYSTEM_DEFINES)
 SYSTEM_ASMFLAGS = -felf64
-SYSTEM_LDFLAGS = -nostdlib -zmax-page-size=0x1000 -static -Tconf/link.ld
 
 SYSTEM_CFILES = $(shell find sys/ -name "*.c")
-SYSTEM_ASMFILES = $(shell find sys/ -name "*.asm")
+SYSTEM_ASMFILES = $(shell find sys/ -name "*.s")
 
-QEMU_FLAGS = --enable-kvm -monitor stdio -cpu qemu64 -M q35 -m 256M
+ARCH = @ARCH@
 
+ifeq ($(ARCH), aarch64)
+CC = cross/bin/aarch64-elf-gcc
+LD = cross/bin/aarch64-elf-ld
+SYSTEM_LDFLAGS = -nostdlib -zmax-page-size=0x1000 -static -Tconf/link-aarch64.ld -m aarch64elf
+QEMU_FLAGS = -cpu cortex-a72        \
+            -m 512m                 \
+            -bios OVMF.fd  					\
+            -monitor stdio          \
+            -device ramfb           \
+            -device qemu-xhci       \
+            -device usb-kbd         \
+            -d int									\
+						-M virt
+
+
+ASM = cross/bin/aarch64-elf-as
+else
 CC = cross/bin/x86_64-elf-gcc
 LD = cross/bin/x86_64-elf-ld
-
-ASM = nasm
+SYSTEM_LDFLAGS = -nostdlib -zmax-page-size=0x1000 -static -Tconf/link-x86_64.ld
+QEMU_FLAGS = --enable-kvm -monitor stdio -cpu qemu64 -M q35 -m 256M -cdrom Vega.iso
+ASM = cross/bin/x86_64-elf-as
+endif
 
 SYSTEM_OBJECTS = $(SYSTEM_CFILES:.c=.o)
 SYSTEM_HEADER_DEPS = $(SYSTEM_CFILES:.c=.d)
-SYSTEM_ASM_OBJECTS = $(SYSTEM_ASMFILES:.asm=.s.o)
+SYSTEM_ASM_OBJECTS = $(SYSTEM_ASMFILES:.s=.s.o)
 
 .PHONY: all
 all: stand/limine/ base/boot/vega-kernel
@@ -41,8 +59,8 @@ base/boot/vega-kernel: $(SYSTEM_OBJECTS) $(SYSTEM_ASM_OBJECTS)
 %.o: %.c
 	$(CC) -c $(SYSTEM_CFLAGS) $< -o $@
 
-%.s.o: %.asm
-	$(ASM) $(SYSTEM_ASMFILES) $< $@
+%.s.o: %.s
+	$(ASM) $< -o $@
 
 stand/limine/:
 	mkdir -p stand/
@@ -51,7 +69,15 @@ stand/limine/:
 
 .PHONY: run
 run:
-		qemu-system-x86_64 $(QEMU_FLAGS) -cdrom Vega.iso
+		qemu-system-$(ARCH) $(QEMU_FLAGS) -cdrom Vega.iso
+
+.PHONY: cross_x86_64
+cross_x86_64:
+	bash tools/cross.sh x86_64-elf
+
+.PHONY: cross_aarch64
+cross_aarch64:
+	bash tools/cross.sh aarch64-elf
 
 .PHONY: clean
 clean:
