@@ -1,4 +1,4 @@
-/* description: author: Ian Marco Moffett */
+/* author: Ian Marco Moffett */
 
 .ifdef __aarch64__
 
