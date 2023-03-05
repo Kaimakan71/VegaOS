@@ -7,8 +7,10 @@ Note: VegaOS is in an early state.
 ## Getting started
 These instructions will guide you through the process of building VegaOS from source and installing it on your machine.
 
-### Prerequisites
+### Build dependencies
 - gcc (latest stable release)
+- xorriso
+- git
 - QEMU
 
 ### Building VegaOS for x86_64
@@ -26,10 +28,10 @@ make cross_aarch64
 make
 ```
 
-This will generate the ISO image, which can be used to install VegaOS on your machine.
+This will generate the ISO image.
 
 #### QEMU
-To install VegaOS on QEMU, run the following command:
+To run VegaOS on QEMU, run the following command:
 ```bash
 make run
 ```
