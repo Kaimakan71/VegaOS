@@ -103,6 +103,56 @@ static void init_bitmap(void)
   }
 }
 
+static size_t find_contiguous_chunk(size_t frame_count)
+{
+  size_t frames_found = 0;
+  size_t bit_start = 0;
+  for (size_t bit = 1; bit < get_bitmap_size()*8; ++bit)
+  {
+    if (!bitmap_test_bit(bitmap, bit))
+    {
+      bit_start = bit;
+      ++frames_found;
+    }
+    else
+    {
+      bit_start = 0;
+      frames_found = 0;
+    }
+
+    if (frames_found >= frame_count)
+    {
+      return bit_start;
+    }
+  }
+
+  return bit_start;
+}
+
+uintptr_t pmm_alloc(size_t frames)
+{
+  size_t bit = find_contiguous_chunk(frames);
+  if (bit == 0)
+  {
+    return 0;
+  }
+
+  for (size_t i = bit; i < bit+frames; ++i)
+  {
+    bitmap_set_bit(bitmap, i);
+  }
+
+  return PAGE_SIZE*bit;
+}
+
+void pmm_free(uintptr_t ptr, size_t frames)
+{
+  for (size_t i = ptr; i < ptr+(frames*PAGE_SIZE); i += PAGE_SIZE)
+  {
+    bitmap_unset_bit(bitmap, i/0x1000);
+  }
+}
+
 void pmm_init(void)
 {
   mmap_resp = mmap_req.response;
