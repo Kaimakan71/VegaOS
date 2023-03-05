@@ -12,7 +12,6 @@
 #if defined(__aarch64__)
 MODULE("vmm");
 
-#define GET_PML1_IDX(virt) ((virt >> 12) & 0x1FF)
 #define PT_FLAG_VALID    ((size_t)1 << 0)
 #define PT_FLAG_TABLE    ((size_t)1 << 1)
 #define PT_FLAG_4K_PAGE  ((size_t)1 << 1)
@@ -23,7 +22,6 @@ MODULE("vmm");
 #define PT_FLAG_INNER_SH ((size_t)3 << 8)
 #define PT_FLAG_ACCESS   ((size_t)1 << 10)
 #define PT_FLAG_WB       ((size_t)0 << 2)
-#define PT_ADDR_MASK    ((size_t)0x0000FFFFFFFFF000)
 
 
 static uintptr_t get_next_level(uintptr_t pagemap_phys, size_t idx,

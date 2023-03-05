@@ -13,8 +13,13 @@ extern volatile struct limine_hhdm_request g_hhdm_request;
 
 
 /* Use these for vmm_map_page() flags argument */
+#define VMM_PRESENT   (1ULL << 0)
 #define VMM_WRITABLE  (1ULL << 1)
+#define VMM_USER      (1ULL << 2)
 #define VMM_NX        (1ULL << 63)
+
+#define PT_ADDR_MASK    ((size_t)0x0000FFFFFFFFF000)
+#define GET_PML1_IDX(virt) ((virt >> 12) & 0x1FF)
 
 
 /*
