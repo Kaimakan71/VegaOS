@@ -6,5 +6,6 @@
 #include <sys/types.h>
 
 void *memcpy(void *s1, const void *s2, size_t n);
+void *memset(void *ptr, int val, size_t length);
 
 #endif
