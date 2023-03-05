@@ -6,7 +6,6 @@
 #include <sys/module.h>
 #include <sys/types.h>
 #include <mm/pmm.h>
-#include <mm/vmm.h>
 
 #if defined(__x86_64__)
 # include <amd64/exceptions.h>
