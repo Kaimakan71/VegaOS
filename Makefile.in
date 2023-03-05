@@ -25,12 +25,14 @@ QEMU_FLAGS = -cpu cortex-a72        \
 
 
 ASM = cross/bin/aarch64-elf-as
+ASMFLAGS = -D__aarch64__
 else
 CC = cross/bin/x86_64-elf-gcc
 LD = cross/bin/x86_64-elf-ld
 SYSTEM_LDFLAGS = -nostdlib -zmax-page-size=0x1000 -static -Tconf/link-x86_64.ld
 QEMU_FLAGS = --enable-kvm -monitor stdio -cpu qemu64 -M q35 -m 256M -cdrom Vega.iso
 ASM = cross/bin/x86_64-elf-as
+ASMFLAGS =
 endif
 
 SYSTEM_OBJECTS = $(SYSTEM_CFILES:.c=.o)
@@ -60,7 +62,7 @@ base/boot/vega-kernel: $(SYSTEM_OBJECTS) $(SYSTEM_ASM_OBJECTS)
 	$(CC) -c $(SYSTEM_CFLAGS) $< -o $@
 
 %.s.o: %.s
-	$(ASM) $< -o $@
+	$(ASM) $(ASMFLAGS) $< -o $@
 
 stand/limine/:
 	mkdir -p stand/
