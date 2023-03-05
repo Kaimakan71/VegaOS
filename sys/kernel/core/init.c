@@ -58,9 +58,9 @@ __dead void _start(void)
 
 #if defined(__x86_64__)
   amd64_init();
-  kinfo("Board: %s\n", get_board());
 #elif defined(__aarch64__)
   aarch64_init();
+  kinfo("Board: %s\n", get_board());
 #endif
 
   pmm_init();
