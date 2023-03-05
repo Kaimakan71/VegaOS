@@ -66,7 +66,6 @@ __dead void _start(void)
 #endif
 
   pmm_init();
-  vmm_init();
 
   for (;;)
   {
