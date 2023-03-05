@@ -1,4 +1,4 @@
-#if defined(__aarch64__)
+.ifdef __aarch64__
 
 .global exceptions_init
 
@@ -49,4 +49,4 @@ mem_access_violation:
 vector_tbl:
   b isr
 
-#endif
+.endif
