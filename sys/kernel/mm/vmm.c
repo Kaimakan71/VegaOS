@@ -30,7 +30,7 @@ static uintptr_t get_toplevel_tt(void)
 
 #if defined(__aarch64__)
   __asm("mrs %0, ttbr0_el1" : "=r" (phys));
-#else
+#elif defined(__x86_64__)
   __asm("mov %%cr3, %0" : "=r" (phys));
 #endif
   
@@ -47,7 +47,7 @@ static void set_toplevel_tt(uintptr_t phys)
 {
 #if defined(__aarch64__)
   __asm("msr ttbr0_el1, %0" :: "r" (phys));
-#else
+#elif defined(__x86_64__)
   __asm("mov %0, %%cr3" :: "r" (phys));
 #endif
   
@@ -71,7 +71,7 @@ void vmm_init(void)
 
 #if defined(__aarch64__)
   kinfo("Loaded TTBR0_EL1! (top_level_tt_phys=%x)\n", toplevel_tt_phys);
-#else
+#elif defined(__x86_64__)
   kinfo("Loaded CR3! (top_level_tt_phys=%x)\n", toplevel_tt_phys);
 #endif
 }
