@@ -5,7 +5,7 @@ SYSTEM_CFLAGS = @CFLAGS@ $(SYSTEM_DEFINES)
 SYSTEM_ASMFLAGS = -felf64
 
 SYSTEM_CFILES = $(shell find sys/ -name "*.c")
-SYSTEM_ASMFILES = $(shell find sys/ -name "*.asm")
+SYSTEM_ASMFILES = $(shell find sys/ -name "*.s")
 
 ARCH = @ARCH@
 
@@ -21,20 +21,21 @@ QEMU_FLAGS = -cpu cortex-a72        \
             -device qemu-xhci       \
             -device usb-kbd         \
             -d int									\
-						-M virt									\
-						-cdrom Vega.iso
+						-M virt
+
+
+ASM = cross/bin/aarch64-elf-as
 else
 CC = cross/bin/x86_64-elf-gcc
 LD = cross/bin/x86_64-elf-ld
 SYSTEM_LDFLAGS = -nostdlib -zmax-page-size=0x1000 -static -Tconf/link-x86_64.ld
 QEMU_FLAGS = --enable-kvm -monitor stdio -cpu qemu64 -M q35 -m 256M -cdrom Vega.iso
+ASM = cross/bin/x86_64-elf-as
 endif
-
-ASM = nasm
 
 SYSTEM_OBJECTS = $(SYSTEM_CFILES:.c=.o)
 SYSTEM_HEADER_DEPS = $(SYSTEM_CFILES:.c=.d)
-SYSTEM_ASM_OBJECTS = $(SYSTEM_ASMFILES:.asm=.s.o)
+SYSTEM_ASM_OBJECTS = $(SYSTEM_ASMFILES:.s=.s.o)
 
 .PHONY: all
 all: stand/limine/ base/boot/vega-kernel
@@ -58,8 +59,8 @@ base/boot/vega-kernel: $(SYSTEM_OBJECTS) $(SYSTEM_ASM_OBJECTS)
 %.o: %.c
 	$(CC) -c $(SYSTEM_CFLAGS) $< -o $@
 
-%.s.o: %.asm
-	$(ASM) $(SYSTEM_ASMFILES) $< $@
+%.s.o: %.s
+	$(ASM) $< -o $@
 
 stand/limine/:
 	mkdir -p stand/
