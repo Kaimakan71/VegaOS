@@ -70,7 +70,7 @@ void vmm_init(void)
   set_toplevel_tt(toplevel_tt_phys);
 
 #if defined(__aarch64__)
-  kinfo("Loaded TTBR0_EL1 (top_level_tt_phys=%x)\n", toplevel_tt_phys);
+  kinfo("Loaded TTBR0_EL1! (top_level_tt_phys=%x)\n", toplevel_tt_phys);
 #else
   kinfo("Loaded CR3! (top_level_tt_phys=%x)\n", toplevel_tt_phys);
 #endif
