@@ -42,7 +42,7 @@
 #elif defined(__aarch64__)
 
 # define halt()                  __asm("wfi")
-# define global_irq_disable()    __asm("msr daifset, #2")
-# define global_irq_enable()     __asm("msr daifclr, #2")
+# define global_irq_disable()    __asm("cpsid if")
+# define global_irq_enable()     __asm("cpsie if")
 #endif    /* __x86_64__  */
 #endif    /* _SYS_PAL_H_ */
