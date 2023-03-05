@@ -20,6 +20,7 @@ MODULE("kinit");
 #if defined(__aarch64__)
 static void aarch64_init(void)
 {
+  exceptions_init();
 }
 #elif defined(__x86_64__)
 static void amd64_init(void)
@@ -66,7 +67,6 @@ __dead void _start(void)
 
   pmm_init();
   vmm_init();
-  exceptions_init();
 
   for (;;)
   {
