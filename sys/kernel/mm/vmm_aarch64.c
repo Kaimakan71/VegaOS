@@ -25,10 +25,6 @@ MODULE("vmm");
 #define PT_FLAG_WB       ((size_t)0 << 2)
 #define PT_ADDR_MASK    ((size_t)0x0000FFFFFFFFF000)
 
-volatile struct limine_hhdm_request g_hhdm_request = {
-  .id = LIMINE_HHDM_REQUEST,
-  .revision = 0
-};
 
 static uintptr_t get_next_level(uintptr_t pagemap_phys, size_t idx,
                                 uint8_t alloc)
