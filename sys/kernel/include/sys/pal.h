@@ -40,9 +40,12 @@
 # define global_irq_enable()     __asm("sti")
 
 #elif defined(__aarch64__)
+void global_irq_disable(void);
+void global_irq_enable(void);
 
 # define halt()                  __asm("0: wfi; b 0")
-# define global_irq_disable()
-# define global_irq_enable()
+# define isb()                   __asm("isb")
+# define dmb()                   __asm("dmb")
+
 #endif    /* __x86_64__  */
 #endif    /* _SYS_PAL_H_ */
