@@ -32,7 +32,7 @@ void aarch64_mmio_init(void)
   uintptr_t mmio_base = aarch64_get_mmio_base();
 
   vmm_map_page(vmm_get_vas(),
-               mmio_base,
+               mmio_base + VMM_HIGHER_HALF,
                mmio_base,
                VMM_PRESENT | VMM_WRITABLE
   );
