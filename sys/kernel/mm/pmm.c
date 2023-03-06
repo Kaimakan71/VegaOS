@@ -109,7 +109,7 @@ static size_t find_contiguous_chunk(size_t frame_count)
   size_t bit_start = 0;
   for (size_t bit = 1; bit < get_bitmap_size()*8; ++bit)
   {
-    if (!bitmap_test_bit(bitmap, bit))
+    if (bitmap_test_bit(bitmap, bit))
     {
       bit_start = bit;
       ++frames_found;
@@ -139,7 +139,7 @@ uintptr_t pmm_alloc(size_t frames)
 
   for (size_t i = bit; i < bit+frames; ++i)
   {
-    bitmap_set_bit(bitmap, i);
+    bitmap_unset_bit(bitmap, i);
   }
 
   return PAGE_SIZE*bit;
@@ -149,7 +149,7 @@ void pmm_free(uintptr_t ptr, size_t frames)
 {
   for (size_t i = ptr; i < ptr+(frames*PAGE_SIZE); i += PAGE_SIZE)
   {
-    bitmap_unset_bit(bitmap, i/0x1000);
+    bitmap_set_bit(bitmap, i/0x1000);
   }
 }
 
