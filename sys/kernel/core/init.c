@@ -12,6 +12,7 @@
 # include <amd64/idt.h>
 #elif defined(__aarch64__)
 # include <aarch64/exceptions.h>
+# include <aarch64/mmio.h>
 #endif
 
 MODULE("kinit");
@@ -20,6 +21,7 @@ MODULE("kinit");
 static void aarch64_init(void)
 {
   exceptions_init();
+  aarch64_mmio_init();
 }
 #elif defined(__x86_64__)
 static void amd64_init(void)
@@ -29,42 +31,18 @@ static void amd64_init(void)
 }
 #endif
 
-#if defined(__aarch64__)
-static const char *get_board(void)
-{
-  uint32_t reg;
-  asm volatile ("mrs %x0, midr_el1" : "=r" (reg));
-  
-  switch ((reg >> 4) & 0xFFF) {
-    case 0xB76:
-      return "Raspberry Pi 1";
-    case 0xC07: 
-      return "Raspberry Pi 2";
-    case 0xD03:
-      return "Raspberry Pi 3";
-    case 0xD08: 
-      return "Raspberry Pi 4";
-    default:
-      return "Unknown";
-  }
-
-}
-#endif
-
 __dead void _start(void)
 {
   printk("VegaOS v%s - Copyright (c) 2023 Ian Marco Moffett\n",
          VEGA_VERSION
   );
 
+  pmm_init();
 #if defined(__x86_64__)
   amd64_init();
 #elif defined(__aarch64__)
   aarch64_init();
-  kinfo("Board: %s\n", get_board());
 #endif
-
-  pmm_init();
 
   for (;;)
   {
