@@ -14,5 +14,5 @@ void bitmap_unset_bit(bitmap_t bitmap, size_t bit)
 
 uint8_t bitmap_test_bit(bitmap_t bitmap, size_t bit)
 {
-  return (bitmap[bit / 8] & (1 << (bit % 8))) >> bit;
+  return (bitmap[bit / 8] & (1 << (bit % 8))) != 0;
 }
