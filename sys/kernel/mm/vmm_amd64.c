@@ -22,10 +22,10 @@ static uintptr_t get_next_level(uintptr_t pagemap_phys, size_t idx,
   }
 
   uintptr_t next_level = pmm_alloc(1);
-                             | VMM_PRESENT
-                             | VMM_WRITABLE
-                             | VMM_USER;
-  pagemap[idx] = next_level 
+  pagemap[idx] = next_level
+                 | VMM_PRESENT
+                 | VMM_WRITABLE
+                 | VMM_USER;
   return next_level;
 }
 
