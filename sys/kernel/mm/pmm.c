@@ -15,13 +15,13 @@
 
 MODULE("pmm");
 
-static volatile struct limine_memmap_request mmap_req = {
+static struct limine_memmap_response *mmap_resp = NULL;
+static bitmap_t bitmap = NULL;
+
+volatile struct limine_memmap_request mmap_req = {
   .id = LIMINE_MEMMAP_REQUEST,
   .revision = 0
 };
-
-static struct limine_memmap_response *mmap_resp = NULL;
-static bitmap_t bitmap = NULL;
 
 static struct limine_memmap_entry *find_highest_mmap_entry(void)
 {
@@ -29,7 +29,7 @@ static struct limine_memmap_entry *find_highest_mmap_entry(void)
 
   for (size_t i = 0; i < mmap_resp->entry_count; ++i)
   {
-    struct limine_memmap_entry* current_entry = mmap_resp->entries[i];
+    struct limine_memmap_entry *current_entry = mmap_resp->entries[i];
     if (current_entry->type != LIMINE_MEMMAP_USABLE)
     {
       continue;
