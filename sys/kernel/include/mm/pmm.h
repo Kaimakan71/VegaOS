@@ -9,4 +9,7 @@ void pmm_init(void);
 uintptr_t pmm_alloc(size_t frames);
 void pmm_free(uintptr_t ptr, size_t frames);
 
+
+extern volatile struct limine_memmap_request mmap_req;
+
 #endif
