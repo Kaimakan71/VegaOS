@@ -14,7 +14,7 @@ CC = cross/bin/aarch64-elf-gcc
 LD = cross/bin/aarch64-elf-ld
 SYSTEM_LDFLAGS = -nostdlib -zmax-page-size=0x1000 -static -Tconf/link-aarch64.ld -m aarch64elf
 QEMU_FLAGS = -cpu cortex-a72        \
-            -m 512m                 \
+            -m 2G                 	\
             -bios OVMF.fd  					\
             -monitor stdio          \
             -device ramfb           \
