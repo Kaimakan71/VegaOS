@@ -13,17 +13,27 @@ SECTIONS
 {
     . = 0xFFFFFFFF80000000;
 
+    __ktext_base = .;
+
     .text : {
         *(.text .text.*)
     } :text
 
+    __ktext_end = .;
+
     . += CONSTANT(MAXPAGESIZE);
+
+    __krodata_base = .;
 
     .rodata : {
         *(.rodata .rodata.*)
     } :rodata
 
+    __krodata_end = .;
+
     . += CONSTANT(MAXPAGESIZE);
+
+    __kdata_base = .;
 
     .data : {
         *(.data .data.*)
@@ -33,6 +43,8 @@ SECTIONS
         *(COMMON)
         *(.bss .bss.*)
     } :data
+
+    __kdata_end = .;
 
     /DISCARD/ : {
         *(.note .note.*)
