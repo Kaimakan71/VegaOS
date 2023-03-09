@@ -12,7 +12,6 @@
 # include <amd64/idt.h>
 #elif defined(__aarch64__)
 # include <aarch64/exceptions.h>
-# include <aarch64/mmio.h>
 #endif
 
 MODULE("kinit");
@@ -21,7 +20,6 @@ MODULE("kinit");
 static void aarch64_init(void)
 {
   exceptions_init();
-  aarch64_mmio_init();
 }
 #elif defined(__x86_64__)
 static void amd64_init(void)
