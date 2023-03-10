@@ -27,47 +27,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#include <sys/pal.h>
-#include <sys/printk.h>
-#include <sys/module.h>
+#ifndef _AARCH64_BCM2835_H_
+#define _AARCH64_BCM2835_H_
+
 #include <sys/types.h>
-#include <mm/pmm.h>
 
-#if defined(__x86_64__)
-# include <amd64/exceptions.h>
-# include <amd64/idt.h>
-#elif defined(__aarch64__)
-# include <aarch64/exceptions.h>
-# include <aarch64/mm/mmu.h>
-# include <dev/irqchip/bcm2835.h>
+void bcm2835_init(void);
+
+/*
+ *  Returns a virtual address.
+ */
+
+uintptr_t get_mmio_base(void);
+
 #endif
-
-MODULE("kinit");
-
-static void arch_init(void)
-{
-#if defined(__x86_64__)
-  idt_load();
-  exceptions_load();
-#elif defined(__aarch64__)
-  exceptions_init();
-  aarch64_mmu_init();
-  bcm2835_init();
-#endif
-}
-
-__dead void _start(void)
-{
-  printk("VegaOS v%s - Copyright (c) 2023 Ian Marco Moffett\n",
-         VEGA_VERSION
-  );
-
-  pmm_init();
-  arch_init();
-
-  for (;;)
-  {
-    halt();
-  }
-}

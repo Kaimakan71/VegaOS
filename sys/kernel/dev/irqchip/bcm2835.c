@@ -27,47 +27,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <dev/irqchip/bcm2835.h>
 #include <sys/cdefs.h>
-#include <sys/pal.h>
-#include <sys/printk.h>
 #include <sys/module.h>
-#include <sys/types.h>
+#include <sys/printk.h>
+#include <mm/vmm.h>
 #include <mm/pmm.h>
 
-#if defined(__x86_64__)
-# include <amd64/exceptions.h>
-# include <amd64/idt.h>
-#elif defined(__aarch64__)
-# include <aarch64/exceptions.h>
-# include <aarch64/mm/mmu.h>
-# include <dev/irqchip/bcm2835.h>
-#endif
+MODULE("bcm2835");
 
-MODULE("kinit");
-
-static void arch_init(void)
+static uintptr_t mmio_virt = 0;
+static uintptr_t get_mmio_phys(void)
 {
-#if defined(__x86_64__)
-  idt_load();
-  exceptions_load();
-#elif defined(__aarch64__)
-  exceptions_init();
-  aarch64_mmu_init();
-  bcm2835_init();
-#endif
+  uint32_t reg;
+  __asm("mrs %x0, midr_el1" : "=r" (reg));
+
+  switch ((reg >> 4) & 0xFFF)
+  {
+    case 0xB76:
+      return 0x20000000;
+    case 0xC07: 
+      return 0x3F000000;
+    case 0xD03:
+      return 0x3F000000;
+    case 0xD08: 
+      return 0xFE000000;
+    default:
+      return 0x20000000;
+  }
 }
 
-__dead void _start(void)
-{
-  printk("VegaOS v%s - Copyright (c) 2023 Ian Marco Moffett\n",
-         VEGA_VERSION
+void bcm2835_init(void)
+{ 
+  /*
+   *  The pmm_alloc() call
+   *  is used to leak a
+   *  single pageframe
+   *  for use as a virtual address.
+   */
+  
+  mmio_virt = pmm_alloc(1);
+  vmm_map_page(
+      vmm_get_vas(),
+      mmio_virt,
+      0xFE000000,
+      VMM_WRITABLE |
+      VMM_GLOBAL,
+      PAGESIZE_4K
   );
 
-  pmm_init();
-  arch_init();
-
-  for (;;)
-  {
-    halt();
-  }
+  kinfo("MMIO virtual base %x\n", mmio_virt);
 }
