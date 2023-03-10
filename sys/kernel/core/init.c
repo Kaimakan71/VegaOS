@@ -39,22 +39,21 @@
 # include <amd64/idt.h>
 #elif defined(__aarch64__)
 # include <aarch64/exceptions.h>
+# include <aarch64/mm/mmu.h>
 #endif
 
 MODULE("kinit");
 
-#if defined(__aarch64__)
-static void aarch64_init(void)
+static void arch_init(void)
 {
-  exceptions_init();
-}
-#elif defined(__x86_64__)
-static void amd64_init(void)
-{
+#if defined(__x86_64__)
   idt_load();
+  exceptions_load();
+#elif defined(__aarch64__)
   exceptions_init();
-}
+  aarch64_mmu_init();
 #endif
+}
 
 __dead void _start(void)
 {
@@ -63,11 +62,7 @@ __dead void _start(void)
   );
 
   pmm_init();
-#if defined(__x86_64__)
-  amd64_init();
-#elif defined(__aarch64__)
-  aarch64_init();
-#endif
+  arch_init();
 
   for (;;)
   {
