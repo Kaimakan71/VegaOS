@@ -163,6 +163,8 @@ void aarch64_mmu_init(void)
   cpu_write_sysreg(mair_el1, mair);
   cpu_write_sysreg(tcr_el1, tcr);
 
+  kinfo("Wrote MAIR and TCR for EL1\n");
+
   pagemap.ttbr[0] = cpu_read_sysreg(ttbr0_el1);
   pagemap.ttbr[1] = cpu_read_sysreg(ttbr1_el1);
 }
