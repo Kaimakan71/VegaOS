@@ -33,6 +33,12 @@
 #include <sys/limine.h>
 #include <sys/types.h>
 
+#if defined(__aarch64__)
+# include <aarch64/mm/mmu.h>
+#else
+/* TODO */
+#endif
+
 extern volatile struct limine_hhdm_request g_hhdm_request;
 
 #define VMM_HIGHER_HALF (g_hhdm_request.response->offset)
@@ -42,5 +48,12 @@ extern volatile struct limine_hhdm_request g_hhdm_request;
 #define VMM_WRITABLE  (1 << 1)
 #define VMM_USER      (1 << 2)
 #define VMM_EXEC      (1 << 3)
+#define VMM_GLOBAL    (1 << 4)
+
+#if defined(__aarch64__)
+# define vmm_map_page   aarch64_map_page
+# define vmm_unmap_page aarch64_unmap_page
+# define vmm_get_vas    aarch64_get_pagemap
+#endif
 
 #endif
