@@ -41,6 +41,6 @@ extern volatile struct limine_hhdm_request g_hhdm_request;
 #define VMM_PRESENT   (1 << 0)
 #define VMM_WRITABLE  (1 << 1)
 #define VMM_USER      (1 << 2)
-#define VMM_NX        (1 << 3)
+#define VMM_EXEC      (1 << 3)
 
 #endif

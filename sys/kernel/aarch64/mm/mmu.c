@@ -70,7 +70,7 @@ static uintptr_t next_level(uintptr_t level_phys, size_t index, uint8_t alloc)
   {
     return 0;
   }
-
+  
   uintptr_t next = pmm_alloc(1);
   
   if (next == 0)
@@ -141,8 +141,8 @@ uintptr_t aarch64_translate_vaddr(struct aarch64_pagemap p, uintptr_t vaddr)
 
 
 void aarch64_map_page(struct aarch64_pagemap p, uintptr_t vaddr,
-                           uintptr_t phys, size_t flags,
-                           pagesize_t pagesize)
+                      uintptr_t phys, size_t flags,
+                      pagesize_t pagesize)
 {
   uint8_t ttbr_index = vaddr >= VMM_HIGHER_HALF;
 
@@ -150,7 +150,43 @@ void aarch64_map_page(struct aarch64_pagemap p, uintptr_t vaddr,
   size_t level1_index = (vaddr >> 30) & 0x1FF;
   size_t level2_index = (vaddr >> 21) & 0x1FF;
   size_t level3_index = (vaddr >> 12) & 0x1FF; 
-  
+
+  if ((flags & VMM_WRITABLE) == 0)
+  {
+    flags |= PTE_RO;
+  }
+
+  if ((flags & VMM_EXEC) == 0)
+  {
+    flags |= PTE_NX;
+  }
+
+  if ((flags & VMM_USER) != 0)
+  {
+    flags |= PTE_U;
+  }
+
+  /* 
+   *  Emulate SMEP with NX bits
+   *  for security purposes
+   *
+   *  If ttbr_index is 1, then
+   *  the virtual address
+   *  is on the higher half.
+   *
+   *  If the ttbr_index is 0,
+   *  then the virtual address
+   *  is on the lower half.
+   */
+  if (ttbr_index == 1)
+  {
+    flags |= PTE_UXN;
+  }
+  else if (ttbr_index == 0)
+  {
+    flags |= PTE_PXN;
+  }
+
   uintptr_t lookup_level_0 = p.ttbr[ttbr_index] & PTE_ADDR_MASK;  
   uintptr_t current_level = next_level(lookup_level_0, level0_index, 1);
 

@@ -76,7 +76,7 @@ uintptr_t aarch64_translate_vaddr(struct aarch64_pagemap p, uintptr_t vaddr);
  *  p: Pagemap.
  *  vaddr: Virtual address.
  *  phys: Physical address.
- *  flags: PTE flags.
+ *  flags: PTE flags (uses flags like VMM_PRESENT, etc)
  *  pagesize: Size of the page (supports huge pages)
  *
  */
