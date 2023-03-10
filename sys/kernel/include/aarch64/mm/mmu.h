@@ -31,6 +31,7 @@
 #define _MM_MMU_H_
 
 #include <sys/types.h>
+#include <mm/pagesize.h>
 
 #define PTE_P   (1ULL << 0)
 #define PTE_TBL (1ULL << 1)
@@ -67,5 +68,30 @@ void aarch64_mmu_init(void);
  */
 
 uintptr_t aarch64_translate_vaddr(struct aarch64_pagemap p, uintptr_t vaddr);
+
+/*
+ *  Maps a virtual address to a physical
+ *  address.
+ *
+ *  p: Pagemap.
+ *  vaddr: Virtual address.
+ *  phys: Physical address.
+ *  flags: PTE flags.
+ *  pagesize: Size of the page (supports huge pages)
+ *
+ */
+
+void aarch64_map_page(struct aarch64_pagemap p, uintptr_t vaddr,
+                      uintptr_t phys, size_t flags,
+                      pagesize_t pagesize);
+
+/*
+ *  Unmaps a virtual address.
+ *
+ *  @p: Pagemap.
+ *  @vaddr: Virtual address.
+ */
+
+void aarch64_unmap_page(struct aarch64_pagemap p, uintptr_t vaddr);
 
 #endif

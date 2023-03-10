@@ -34,6 +34,7 @@
 #include <sys/module.h>
 #include <sys/math.h>
 #include <sys/printk.h>
+#include <sys/cdefs.h>
 #include <sys/panic.h>
 
 MODULE("mmu");
@@ -41,6 +42,20 @@ MODULE("mmu");
 #if defined(__aarch64__)
 
 static struct aarch64_pagemap pagemap;
+
+static inline void invalidate_page(uintptr_t vaddr)
+{
+  uintptr_t page_number = vaddr >> 12;
+  __asm__ __volatile__ (
+    "dsb ish\n\t"       /* Ensure that all memory accesses have completed */
+    "dc isw, %0\n\t"    /* Invalidate the page using the ISW operation code */
+    "dsb ish\n\t"       /* Ensure completion of cache invalidation */
+    "isb\n\t"           /* Ensure instruction stream synchronization */
+    :
+    : "r" (page_number)
+    : "memory"
+  );
+}
 
 static uintptr_t next_level(uintptr_t level_phys, size_t index, uint8_t alloc)
 {
@@ -57,6 +72,12 @@ static uintptr_t next_level(uintptr_t level_phys, size_t index, uint8_t alloc)
   }
 
   uintptr_t next = pmm_alloc(1);
+  
+  if (next == 0)
+  {
+    panic("Failed to allocate pageframe for next level\n");
+  }
+
   level_virt[index] = next  |
                       PTE_P |
                       PTE_TBL;
@@ -86,16 +107,8 @@ static uintptr_t next_level(uintptr_t level_phys, size_t index, uint8_t alloc)
 
 uintptr_t aarch64_translate_vaddr(struct aarch64_pagemap p, uintptr_t vaddr)
 {
-  /*
-   *  If bit 64 of the virtual address
-   *  is set, it's a higher half address.
-   *
-   *  TTBR0 -> lower half
-   *  TTBR1 -> higher half
-   */
-
   uint8_t ttbr_index = vaddr >= VMM_HIGHER_HALF;
-  
+
   size_t level0_index = (vaddr >> 39) & 0x1FF;
   size_t level1_index = (vaddr >> 30) & 0x1FF;
   size_t level2_index = (vaddr >> 21) & 0x1FF;
@@ -124,6 +137,69 @@ uintptr_t aarch64_translate_vaddr(struct aarch64_pagemap p, uintptr_t vaddr)
   }
 
   return next_level(current_level, level3_index, 0);
+}
+
+
+void aarch64_map_page(struct aarch64_pagemap p, uintptr_t vaddr,
+                           uintptr_t phys, size_t flags,
+                           pagesize_t pagesize)
+{
+  uint8_t ttbr_index = vaddr >= VMM_HIGHER_HALF;
+
+  size_t level0_index = (vaddr >> 39) & 0x1FF;
+  size_t level1_index = (vaddr >> 30) & 0x1FF;
+  size_t level2_index = (vaddr >> 21) & 0x1FF;
+  size_t level3_index = (vaddr >> 12) & 0x1FF; 
+  
+  uintptr_t lookup_level_0 = p.ttbr[ttbr_index] & PTE_ADDR_MASK;  
+  uintptr_t current_level = next_level(lookup_level_0, level0_index, 1);
+
+  current_level = next_level(current_level, level1_index, 1); 
+  current_level = next_level(current_level, level2_index, 1);
+  
+  uintptr_t *pte = (uintptr_t *)(current_level + VMM_HIGHER_HALF);
+  pte[level3_index] = PTE_P   |
+                      PTE_AF  |
+                      PTE_TBL |
+                      phys    |
+                      flags;
+
+  invalidate_page(vaddr);
+}
+
+
+void aarch64_unmap_page(struct aarch64_pagemap p, uintptr_t vaddr)
+{
+  uint8_t ttbr_index = vaddr >= VMM_HIGHER_HALF;
+  size_t level0_index = (vaddr >> 39) & 0x1FF;
+  size_t level1_index = (vaddr >> 30) & 0x1FF;
+  size_t level2_index = (vaddr >> 21) & 0x1FF;
+  size_t level3_index = (vaddr >> 12) & 0x1FF; 
+  
+  uintptr_t lookup_level_0 = p.ttbr[ttbr_index] & PTE_ADDR_MASK;  
+  uintptr_t current_level = next_level(lookup_level_0, level0_index, 0);
+
+  if (current_level == 0)
+  {
+    return;
+  }
+
+  current_level = next_level(current_level, level1_index, 1);
+  
+  if (current_level == 0)
+  {
+    return;
+  }
+
+  current_level = next_level(current_level, level2_index, 1);
+  if (current_level == 0)
+  {
+    return;
+  }
+  
+  uintptr_t *pte = (uintptr_t *)(current_level + VMM_HIGHER_HALF);
+  pte[level3_index] = 0;
+  invalidate_page(vaddr);
 }
 
 void aarch64_mmu_init(void)
