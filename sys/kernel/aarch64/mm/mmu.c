@@ -111,29 +111,30 @@ uintptr_t aarch64_translate_vaddr(struct aarch64_pagemap p, uintptr_t vaddr)
   size_t level2_index = (vaddr >> 21) & 0x1FF;
   size_t level3_index = (vaddr >> 12) & 0x1FF;
 
-  uintptr_t l1 = next_level(p.ttbr[ttbr_index], level0_index, 0);
+  uintptr_t l0 = cpu_read_sysreg(ttbr0_el1) & ~(0x1FFF);
+  uintptr_t l1 = next_level(l0, level0_index, 1);
   
   if (l1 == 0)
   {
     return 0;
   }
 
-  uintptr_t l2 = next_level(l1, level1_index, 0);
-  
+  uintptr_t l2 = next_level(l1, level1_index, 1);
+
   if (l2 == 0)
   {
     return 0;
   }
 
-  uintptr_t l3 = next_level(l2, level2_index, 0);
-  
+  uintptr_t l3 = next_level(l2, level2_index, 1);
+
   if (l3 == 0)
   {
     return 0;
   }
 
-  printk("%x\n", next_level(l3, level3_index, 0));
-  return 0;
+  uintptr_t *pte = (uintptr_t *)(l3 + VMM_HIGHER_HALF);
+  return pte[level3_index];
 }
 
 void aarch64_map_page(struct aarch64_pagemap p, uintptr_t vaddr,
@@ -158,7 +159,7 @@ void aarch64_map_page(struct aarch64_pagemap p, uintptr_t vaddr,
     pte_flags |= PTE_U;
   }
 
-  uint8_t ttbr_index = (vaddr & (0x7FFFFFFULL << 37)) == 0;
+  uint8_t ttbr_index = (vaddr & (0x7FFFFFFULL << 37)) != 0;
 
   size_t level0_index = (vaddr >> 39) & 0x1FF;
   size_t level1_index = (vaddr >> 30) & 0x1FF;
@@ -169,8 +170,6 @@ void aarch64_map_page(struct aarch64_pagemap p, uintptr_t vaddr,
   uintptr_t l1 = next_level(l0, level0_index, 1);
   uintptr_t l2 = next_level(l1, level1_index, 1);
   uintptr_t l3 = next_level(l2, level2_index, 1);
-
-  printk("%x\n", l3);
 
   uintptr_t *pte = (uintptr_t *)(l3 + VMM_HIGHER_HALF);
   pte[level3_index] = PTE_P   |
@@ -185,34 +184,19 @@ void aarch64_map_page(struct aarch64_pagemap p, uintptr_t vaddr,
 
 void aarch64_unmap_page(struct aarch64_pagemap p, uintptr_t vaddr)
 {
-  uint8_t ttbr_index = vaddr >= VMM_HIGHER_HALF;
+  uint8_t ttbr_index = (vaddr & (0x7FFFFFFULL << 37)) != 0;
+
   size_t level0_index = (vaddr >> 39) & 0x1FF;
   size_t level1_index = (vaddr >> 30) & 0x1FF;
   size_t level2_index = (vaddr >> 21) & 0x1FF;
-  size_t level3_index = (vaddr >> 12) & 0x1FF; 
-  
-  uintptr_t lookup_level_0 = p.ttbr[ttbr_index] & PTE_ADDR_MASK;  
-  uintptr_t current_level = next_level(lookup_level_0, level0_index, 0);
+  size_t level3_index = (vaddr >> 12) & 0x1FF;
 
-  if (current_level == 0)
-  {
-    return;
-  }
+  uintptr_t l0 = cpu_read_sysreg(ttbr0_el1) & ~(0x1FFF);
+  uintptr_t l1 = next_level(l0, level0_index, 1);
+  uintptr_t l2 = next_level(l1, level1_index, 1);
+  uintptr_t l3 = next_level(l2, level2_index, 1);
 
-  current_level = next_level(current_level, level1_index, 1);
-  
-  if (current_level == 0)
-  {
-    return;
-  }
-
-  current_level = next_level(current_level, level2_index, 1);
-  if (current_level == 0)
-  {
-    return;
-  }
-  
-  uintptr_t *pte = (uintptr_t *)(current_level + VMM_HIGHER_HALF);
+  uintptr_t *pte = (uintptr_t *)(l3 + VMM_HIGHER_HALF);
   pte[level3_index] = 0;
   invalidate_page(vaddr);
 }
