@@ -27,45 +27,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _MM_MMU_H_
-#define _MM_MMU_H_
+#ifndef _MM_PAGESIZE_H_
+#define _MM_PAGESIZE_H_
 
-#include <sys/types.h>
-
-#define PTE_P   (1ULL << 0)
-#define PTE_TBL (1ULL << 1)
-#define PTE_U   (1ULL << 6)
-#define PTE_RO  (1ULL << 7)
-#define PTE_OSH (2ULL << 8)
-#define PTE_ISH (3ULL << 8)
-#define PTE_AF  (1ULL << 10)
-#define PTE_NG  (1ULL << 11)
-#define PTE_PXN (1ULL << 53)
-#define PTE_UXN (1ULL << 54)
-#define PTE_NX  (PTE_PXN | PTE_UXN)
-#define MMU_2MB 0x200000ULL
-#define MMU_1G  0x40000000ULL
-#define PTE_ADDR_MASK 0x0000FFFFFFFFF000
-
-struct aarch64_pagemap
+typedef enum
 {
-  uintptr_t ttbr[2];
-  uint16_t asid;
-};
-
-/*
- *  Initializes the MMU.
- */
-
-void aarch64_mmu_init(void);
-
-/*
- *  Walks the translation tables
- *  and returns the physical address if found.
- *
- *  Otherwise, returns 0.
- */
-
-uintptr_t aarch64_translate_vaddr(struct aarch64_pagemap p, uintptr_t vaddr);
+  PAGESIZE_4K
+} pagesize_t;
 
 #endif
