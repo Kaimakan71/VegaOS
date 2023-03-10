@@ -166,6 +166,11 @@ void aarch64_map_page(struct aarch64_pagemap p, uintptr_t vaddr,
     flags |= PTE_U;
   }
 
+  if ((flags & VMM_GLOBAL) == 0)
+  {
+    flags |= PTE_NG;
+  }
+
   /* 
    *  Emulate SMEP with NX bits
    *  for security purposes.
