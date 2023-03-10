@@ -238,6 +238,15 @@ void aarch64_unmap_page(struct aarch64_pagemap p, uintptr_t vaddr)
   invalidate_page(vaddr);
 }
 
+struct aarch64_pagemap aarch64_get_pagemap(void)
+{
+  struct aarch64_pagemap pagemap;
+  pagemap.ttbr[0] = cpu_read_sysreg(ttbr0_el1);
+  pagemap.ttbr[1] = cpu_read_sysreg(ttbr1_el1);
+  pagemap.asid = cpu_read_sysreg(contextidr_el1) & 0xFFFF;
+  return pagemap;
+}
+
 void aarch64_mmu_init(void)
 {
   size_t fb_attr  = (cpu_read_sysreg(mair_el1) >> 8) & 0xFF;
@@ -275,10 +284,8 @@ void aarch64_mmu_init(void)
   cpu_write_sysreg(mair_el1, mair);
   cpu_write_sysreg(tcr_el1, tcr);
 
-  kinfo("Wrote MAIR and TCR for EL1\n");
-
-  pagemap.ttbr[0] = cpu_read_sysreg(ttbr0_el1);
-  pagemap.ttbr[1] = cpu_read_sysreg(ttbr1_el1);
+  kinfo("Wrote MAIR and TCR for EL1\n"); 
+  pagemap = aarch64_get_pagemap();
 }
 
 #endif

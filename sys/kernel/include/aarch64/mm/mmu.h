@@ -94,4 +94,10 @@ void aarch64_map_page(struct aarch64_pagemap p, uintptr_t vaddr,
 
 void aarch64_unmap_page(struct aarch64_pagemap p, uintptr_t vaddr);
 
+/*
+ *  Returns top-level pagemap.
+ */
+
+struct aarch64_pagemap aarch64_get_pagemap(void);
+
 #endif
