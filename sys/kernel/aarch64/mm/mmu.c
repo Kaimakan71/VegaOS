@@ -168,7 +168,7 @@ void aarch64_map_page(struct aarch64_pagemap p, uintptr_t vaddr,
 
   /* 
    *  Emulate SMEP with NX bits
-   *  for security purposes
+   *  for security purposes.
    *
    *  If ttbr_index is 1, then
    *  the virtual address
