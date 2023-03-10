@@ -1,3 +1,6 @@
-VegaOS is a microkernel-based operating system designed to be secure and usable on both AARCH64 and x86_64 platforms. 
-We aim to provide a user-friendly interface and support for common user-level utilities and tools, while also
+VegaOS is a microkernel-based operating system designed
+to be secure and usable on both AARCH64 and x86_64 platforms.
+
+We aim to provide a user-friendly interface and support for
+common user-level utilities and tools, while also
 being powerful enough for advanced users.
