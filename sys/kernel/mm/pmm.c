@@ -42,6 +42,17 @@ MODULE("pmm");
 static struct limine_memmap_response *mmap_resp = NULL;
 static bitmap_t bitmap = NULL;
 
+/*
+ *  There's going to be a gap
+ *  where there's a *lot* of bits
+ *  marked as not free, bitmap_start_bit
+ *  points to the end of that gap which
+ *  speeds up the search for a free pageframe
+ *  by a ton.
+ */
+
+static size_t bitmap_start_bit = 0;
+
 volatile struct limine_memmap_request mmap_req = {
   .id = LIMINE_MEMMAP_REQUEST,
   .revision = 0
@@ -122,43 +133,46 @@ static void init_bitmap(void)
       for (size_t j = 0; j < entry->length; j += 0x1000) 
       {
         bitmap_unset_bit(bitmap, (entry->base + j)/0x1000);
+
+        if (bitmap_start_bit == 0)
+        {
+          bitmap_start_bit = (entry->base + j)/0x1000;
+        }
       }
     }
   }
 }
 
 
-static uintptr_t pmm_alloc_internal(void)
+uintptr_t pmm_alloc(size_t frames)
 {
-  for (size_t bit = 0; bit < get_bitmap_size()*8; ++bit) 
+  size_t bit = 0;
+  size_t frames_found = 0;
+  
+  for (size_t current_bit = bitmap_start_bit; current_bit < get_bitmap_size()*8; ++current_bit)
   {
-    if (!(bitmap_test_bit(bitmap, bit)))
+    if (!bitmap_test_bit(bitmap, current_bit))
     {
-      bitmap_set_bit(bitmap, bit);
-      return 0x1000*bit;
+      if (bit == 0)
+      {
+        bit = current_bit;
+      }
+
+      frames_found++;
+
+      if (frames_found >= frames)
+      {
+        return bit*0x1000;
+      }
+    }
+    else
+    {
+      bit = 0;
+      frames_found = 0;
     }
   }
 
   return 0;
-}
-
-uintptr_t pmm_alloc(size_t frames)
-{
-  uintptr_t mem = 0;
-  for (size_t i = 0; i < frames; ++i)
-  {
-    if (mem == 0)
-    {
-      mem = pmm_alloc_internal();
-    }
-
-    if (mem == 0)
-    {
-      return 0;
-    }
-  }
-
-  return mem;
 }
 
 void pmm_free(uintptr_t ptr, size_t frames)
