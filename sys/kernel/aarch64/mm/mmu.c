@@ -111,7 +111,7 @@ uintptr_t aarch64_translate_vaddr(struct aarch64_pagemap p, uintptr_t vaddr)
   size_t level2_index = (vaddr >> 21) & 0x1FF;
   size_t level3_index = (vaddr >> 12) & 0x1FF;
 
-  uintptr_t l0 = cpu_read_sysreg(ttbr0_el1) & ~(0x1FFF);
+  uintptr_t l0 = p.ttbr[ttbr_index] & ~(0x1FFF);
   uintptr_t l1 = next_level(l0, level0_index, 1);
   
   if (l1 == 0)
@@ -166,7 +166,7 @@ void aarch64_map_page(struct aarch64_pagemap p, uintptr_t vaddr,
   size_t level2_index = (vaddr >> 21) & 0x1FF;
   size_t level3_index = (vaddr >> 12) & 0x1FF;
 
-  uintptr_t l0 = cpu_read_sysreg(ttbr0_el1) & ~(0x1FFF);
+  uintptr_t l0 = p.ttbr[ttbr_index] & ~(0x1FFF);
   uintptr_t l1 = next_level(l0, level0_index, 1);
   uintptr_t l2 = next_level(l1, level1_index, 1);
   uintptr_t l3 = next_level(l2, level2_index, 1);
@@ -191,7 +191,7 @@ void aarch64_unmap_page(struct aarch64_pagemap p, uintptr_t vaddr)
   size_t level2_index = (vaddr >> 21) & 0x1FF;
   size_t level3_index = (vaddr >> 12) & 0x1FF;
 
-  uintptr_t l0 = cpu_read_sysreg(ttbr0_el1) & ~(0x1FFF);
+  uintptr_t l0 = p.ttbr[ttbr_index] & ~(0x1FFF);
   uintptr_t l1 = next_level(l0, level0_index, 1);
   uintptr_t l2 = next_level(l1, level1_index, 1);
   uintptr_t l3 = next_level(l2, level2_index, 1);
@@ -248,7 +248,7 @@ void aarch64_mmu_init(void)
   cpu_write_sysreg(tcr_el1, tcr);
 
   kinfo("Wrote MAIR and TCR for EL1\n"); 
-  pagemap = aarch64_get_pagemap(); 
+  pagemap = aarch64_get_pagemap();
 }
 
 #endif
