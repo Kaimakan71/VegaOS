@@ -49,7 +49,7 @@ static void arch_init(void)
 {
 #if defined(__x86_64__)
   idt_load();
-  exceptions_load();
+  exceptions_init();
 #elif defined(__aarch64__)
   exceptions_init();
   aarch64_mmu_init();
