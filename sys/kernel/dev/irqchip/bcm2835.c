@@ -36,6 +36,8 @@
 
 MODULE("bcm2835");
 
+#if defined(__aarch64__)
+
 static uintptr_t mmio_virt = 0;
 static uintptr_t get_mmio_phys(void)
 {
@@ -78,3 +80,5 @@ void bcm2835_init(void)
 
   kinfo("MMIO virtual base %x\n", mmio_virt);
 }
+
+#endif
