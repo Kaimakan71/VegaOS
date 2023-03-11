@@ -167,7 +167,7 @@ void aarch64_map_page(struct aarch64_pagemap p, uintptr_t vaddr,
   size_t level2_index = (vaddr >> 21) & 0x1FF;
   size_t level3_index = (vaddr >> 12) & 0x1FF;
 
-  uintptr_t l0 = p.ttbr[ttbr_index] & ~(0x1FFF);
+  uintptr_t l0 = p.ttbr[ttbr_index];
   uintptr_t l1 = next_level(l0, level0_index, 1);
   uintptr_t l2 = next_level(l1, level1_index, 1);
   uintptr_t l3 = next_level(l2, level2_index, 1);
