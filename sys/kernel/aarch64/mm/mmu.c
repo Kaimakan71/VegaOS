@@ -111,22 +111,23 @@ uintptr_t aarch64_translate_vaddr(struct aarch64_pagemap p, uintptr_t vaddr)
   size_t level2_index = (vaddr >> 21) & 0x1FF;
   size_t level3_index = (vaddr >> 12) & 0x1FF;
 
-  uintptr_t l0 = p.ttbr[ttbr_index] & ~(0x1FFF);
-  uintptr_t l1 = next_level(l0, level0_index, 1);
+  uintptr_t l0 = p.ttbr[ttbr_index] & ~(0x1FF);
+  uintptr_t l1 = next_level(l0, level0_index, 0);
   
   if (l1 == 0)
   {
+    printk("AAA!\n");
     return 0;
   }
 
-  uintptr_t l2 = next_level(l1, level1_index, 1);
+  uintptr_t l2 = next_level(l1, level1_index, 0);
 
   if (l2 == 0)
   {
     return 0;
   }
 
-  uintptr_t l3 = next_level(l2, level2_index, 1);
+  uintptr_t l3 = next_level(l2, level2_index, 0);
 
   if (l3 == 0)
   {
@@ -134,7 +135,7 @@ uintptr_t aarch64_translate_vaddr(struct aarch64_pagemap p, uintptr_t vaddr)
   }
 
   uintptr_t *pte = (uintptr_t *)(l3 + VMM_HIGHER_HALF);
-  return pte[level3_index];
+  return pte[level3_index] & PTE_ADDR_MASK;
 }
 
 void aarch64_map_page(struct aarch64_pagemap p, uintptr_t vaddr,
@@ -191,10 +192,27 @@ void aarch64_unmap_page(struct aarch64_pagemap p, uintptr_t vaddr)
   size_t level2_index = (vaddr >> 21) & 0x1FF;
   size_t level3_index = (vaddr >> 12) & 0x1FF;
 
-  uintptr_t l0 = p.ttbr[ttbr_index] & ~(0x1FFF);
-  uintptr_t l1 = next_level(l0, level0_index, 1);
-  uintptr_t l2 = next_level(l1, level1_index, 1);
-  uintptr_t l3 = next_level(l2, level2_index, 1);
+  uintptr_t l0 = p.ttbr[ttbr_index];
+  uintptr_t l1 = next_level(l0, level0_index, 0);
+  
+  if (l1 == 0)
+  {
+    return;
+  }
+
+  uintptr_t l2 = next_level(l1, level1_index, 0);
+  
+  if (l2 == 0)
+  {
+    return;
+  }
+
+  uintptr_t l3 = next_level(l2, level2_index, 0);
+
+  if (l3 == 0)
+  {
+    return;
+  }
 
   uintptr_t *pte = (uintptr_t *)(l3 + VMM_HIGHER_HALF);
   pte[level3_index] = 0;
@@ -204,8 +222,8 @@ void aarch64_unmap_page(struct aarch64_pagemap p, uintptr_t vaddr)
 struct aarch64_pagemap aarch64_get_pagemap(void)
 {
   struct aarch64_pagemap pagemap;
-  pagemap.ttbr[0] = cpu_read_sysreg(ttbr0_el1) & ~(0x1FFF);
-  pagemap.ttbr[1] = cpu_read_sysreg(ttbr1_el1) & ~(0x1FFF);
+  pagemap.ttbr[0] = cpu_read_sysreg(ttbr0_el1) & PTE_ADDR_MASK;
+  pagemap.ttbr[1] = cpu_read_sysreg(ttbr1_el1) & PTE_ADDR_MASK;
   pagemap.asid = cpu_read_sysreg(contextidr_el1) & 0xFFFF;
   return pagemap;
 }
