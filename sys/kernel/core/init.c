@@ -40,10 +40,73 @@
 #elif defined(__aarch64__)
 # include <aarch64/exceptions.h>
 # include <aarch64/mm/mmu.h>
-# include <dev/irqchip/bcm2835.h>
 #endif
 
 MODULE("kinit");
+
+#if defined(__aarch64__)
+static const char *get_vendor(uint32_t midr_el1)
+{
+  switch ((midr_el1 >> 24) & 0xFF)
+  {
+    case 0xC0:
+      return "Ampere Computing";
+    case 0x41:
+      return "Arm Limited";
+    case 0x42:
+      return "Broadcom Corporation";
+    case 0x43:
+      return "Cavium Inc";
+    case 0x44:
+      return "Digital Equipment Corporation";
+    case 0x46:
+      return "Fujitsu Ltd";
+    case 0x49:
+      return "Infineon Technologies AG";
+    case 0x4D:
+      return "Motorola or Freescale Semiconductor Inc";
+    case 0x4E:
+      return "NVIDIA Corporation";
+    case 0x50:
+      return "Applied Micro Circuits Corporation";
+    case 0x51:
+      return "Qualcomm Inc";
+    case 0x56:
+      return "Marvell International Ltd";
+    case 0x69:
+      return "Intel Corporation";
+    default:
+      return "Unrecognized vendor";
+  }
+}
+
+static void get_board_info(void)
+{
+  uint32_t midr_el1;
+  __asm("mrs %x0, midr_el1" : "=r" (midr_el1));
+
+  switch ((midr_el1 >> 4) & 0xFFF)
+  {
+    case 0xB76:           /* MMIO: 0x20000000 */
+      kinfo("Detected board: Raspberry Pi 1\n");
+      break;
+    case 0xC07:           /* MMIO: 0x3F000000 */
+      kinfo("Detected board: Raspberry Pi 2\n");
+      break;
+    case 0xD03:           /* MMIO: 0x3F000000 */
+      kinfo("Detected board: Raspberry Pi 3\n");
+      break;
+    case 0xD08:            /* MMIO: 0xFE000000 */
+      kinfo("Detected board: Raspberry Pi 4\n");
+      break;
+    default:               /* MMIO: 0x20000000 */
+      kinfo("Unknown \n");
+      break;
+  }
+
+  kinfo("Detected vendor: %s\n", get_vendor(midr_el1));
+}
+#endif
 
 static void arch_init(void)
 {
@@ -53,7 +116,7 @@ static void arch_init(void)
 #elif defined(__aarch64__)
   exceptions_init();
   aarch64_mmu_init();
-  bcm2835_init();
+  get_board_info();
 #endif
 }
 
