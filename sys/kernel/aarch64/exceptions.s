@@ -43,7 +43,7 @@ exceptions_init:
   msr vbar_el1, x0
   ret
 
-isr:
+el1_sp0_sync:
   msr SPSel, #0  /* switch to SP_EL0 */
   mrs x0, esr_el1
   lsr x0, x0, #26
@@ -76,6 +76,6 @@ mem_access_violation:
 
 .align 11
 vector_tbl:
-  b isr
+  b el1_sp0_sync
 
 .endif
