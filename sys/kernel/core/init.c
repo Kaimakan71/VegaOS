@@ -36,6 +36,7 @@
 
 #if defined(__x86_64__)
 # include <amd64/exceptions.h>
+# include <amd64/gdt.h>
 # include <amd64/idt.h>
 #elif defined(__aarch64__)
 # include <aarch64/exceptions.h>
@@ -111,6 +112,7 @@ static void get_board_info(void)
 static void arch_init(void)
 {
 #if defined(__x86_64__)
+  gdt_load();
   idt_load();
   exceptions_init();
 #elif defined(__aarch64__)
