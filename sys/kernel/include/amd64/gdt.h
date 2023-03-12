@@ -27,49 +27,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
-#include <sys/pal.h>
-#include <sys/printk.h>
-#include <sys/module.h>
+#ifndef _AMD64_GDT_H
+#define _AMD64_GDT_H
+
 #include <sys/types.h>
-#include <mm/pmm.h>
+#include <sys/cdefs.h>
 
-#if defined(__x86_64__)
-# include <amd64/exceptions.h>
-# include <amd64/gdt.h>
-# include <amd64/idt.h>
-#elif defined(__aarch64__)
-# include <aarch64/exceptions.h>
-# include <aarch64/mm/mmu.h>
-# include <dev/irqchip/bcm2835.h>
-#endif
-
-MODULE("kinit");
-
-static void arch_init(void)
+struct __packed gdt_entry
 {
-#if defined(__x86_64__)
-  gdt_load();
-  idt_load();
-  exceptions_init();
-#elif defined(__aarch64__)
-  exceptions_init();
-  aarch64_mmu_init();
-  bcm2835_init();
-#endif
-}
+  uint16_t limit;
+  uint16_t base_low;
+  uint8_t base_mid;
+  uint8_t access;
+  uint8_t granularity;
+  uint8_t base_hi;
+};
 
-__dead void _start(void)
+struct __packed gdtr
 {
-  printk("VegaOS v%s - Copyright (c) 2023 Ian Marco Moffett\n",
-         VEGA_VERSION
-  );
+  uint16_t limit;
+  uintptr_t offset;
+};
 
-  pmm_init();
-  arch_init();
+void gdt_load(void);
 
-  for (;;)
-  {
-    halt();
-  }
-}
+#endif
